@@ -97,7 +97,7 @@ export default function Play(props) {
           player.detachMediaElement();
           player.destroy();
           player= null;
-          flv_load()
+          window.setTimeout(flv_load,500)
         }
       });
       //画面卡死
@@ -109,6 +109,7 @@ export default function Play(props) {
         if (lastDecodedFrame != res.decodedFrames) {
           lastDecodedFrame = res.decodedFrames;
         } else {
+            console.log("decodedFrames:", res.decodedFrames)
             lastDecodedFrame = 0;
             if (player) {
               player.pause();
@@ -116,7 +117,7 @@ export default function Play(props) {
               player.detachMediaElement();
               player.destroy();
               player= null;
-              flv_load()
+              window.setTimeout(flv_load,500)
           }
         }
       });

@@ -14,7 +14,7 @@
         return API.POST(`/camera/edit`,params)
     },
     cameraDelete: (params) => {
-        return API.POST(`/camera/delete/${params.id}`,params)
+        return API.POST(`/camera/delete`,params)
     },
     cameraEnabled: (params) => {
         return API.POST(`/camera/enabled`,params)

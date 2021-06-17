@@ -181,14 +181,15 @@ export default function Play(props) {
               onChange={formChange}
             />
             </div>
-            <div>
+            {/* <div>
               <TextField 
                 id="authCode" 
                 label="authCode" 
                 defaultValue={row.authCode}
                 onChange={formChange}
               />
-            </div>
+            </div> */}
+            {props.type === 'edit'?"":
             <div>
               <Switch
                 checked={enabled}
@@ -199,6 +200,7 @@ export default function Play(props) {
                 inputProps={{ 'aria-label': 'primary checkbox' }}
               />
             </div>
+            }
           </form>
         </div>
       </Dialog>
