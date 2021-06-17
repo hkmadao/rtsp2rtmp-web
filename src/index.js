@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import CameraList from './camera/cameraList';
+import Rtsp2rtmp from './Rtsp2rtmp';
 
 function App() {
   return (
-    <CameraList />
+    <Rtsp2rtmp />
   );
 }
 

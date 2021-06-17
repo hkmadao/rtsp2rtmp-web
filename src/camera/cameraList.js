@@ -10,15 +10,14 @@ import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import LinkOffIcon from '@material-ui/icons/LinkOff';
 import LinkIcon from '@material-ui/icons/Link';
-import axios from 'axios'; 
-import ActionList from './actionList';
-import CameraEdit from './cameraEdit';
+import ActionList from './ActionList';
+import CameraEdit from './CameraEdit';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import AppBar from '@material-ui/core/AppBar';
-import Env from '../conf/env';
-
+import Switch from '@material-ui/core/Switch';
+import API from '../api/Api';
 const columns = [
   { id: 'id', label: 'id', minWidth: 170 },
   { id: 'code', label: 'code', minWidth: 100 },
@@ -31,17 +30,26 @@ const columns = [
     label: 'rtmpURL',
   },
   {
-    id: 'authCodeTemp',
-    label: 'authCodeTemp',
-  },
-  {
-    id: 'authCodePermanent',
-    label: 'authCodePermanent',
+    id: 'authCode',
+    label: 'authCode',
   },
   {
     id: 'onlineStatus',
     label: 'onlineStatus',
     format: (value) => value && value === 1?<LinkIcon/>:<LinkOffIcon/>,
+  },
+  {
+    id: 'enabled',
+    label: 'enabled',
+    format: (value) => {
+      return <Switch
+              checked={value === 1}
+              id="enabled"
+              color="primary"
+              name="enabled"
+              inputProps={{ 'aria-label': 'primary checkbox' }}
+            />
+    }
   },
   {
     id: 'action',
@@ -83,7 +91,15 @@ export default function CameraList() {
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   var rows,setRows;
   [rows, setRows] = React.useState([]);
-  var obj = {}
+  var editRow = {
+    id: "",
+    code: "",
+    rtspURL: "",
+    rtmpURL: "",
+    authCode: "",
+    onlineStatus: 0,
+    enabled: 1,
+  }
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -95,10 +111,10 @@ export default function CameraList() {
   };
 
   const getPageList = ()=>{
-    axios.get(`${Env.serverURL}/camera/all`)
+    API.cameraList()
     .then(res => {
       rows.splice(0);
-      rows.push(...res.data.data.page)
+      rows.push(...res.data.page)
       setRows([])
       setRows(rows)
     });
@@ -124,7 +140,7 @@ export default function CameraList() {
           </Typography>
         </Toolbar>
       </AppBar>
-      <CameraEdit row={obj} type="add" callBack={getPageList} onRef={editRef}/>
+      <CameraEdit row={editRow} type="add" callBack={getPageList} onRef={editRef}/>
       <TableContainer className={classes.container}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
