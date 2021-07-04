@@ -5,9 +5,9 @@ import Dialog from '@material-ui/core/Dialog';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
+import Switch from '@material-ui/core/Switch';
 import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
-import Switch from '@material-ui/core/Switch';
 import Flv from 'flv.js';
 import API from '../api/Api';
 
@@ -34,6 +34,11 @@ export default function Play(props) {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
   const [audio, setAudio] = React.useState(true);
+  const [playParam, setPlayParam] = React.useState(props.playParam || {
+    playMethod: "",
+    cameraCode: "",
+    authCode: ""
+  });
   var player = null;
   var lastDecodedFrame = 0
 
@@ -60,7 +65,7 @@ export default function Play(props) {
       var mediaDataSource = {
           type: 'flv'
       };
-      let videoUrl = API.flvURL+"/live/permanent/"+props.row.code+"/"+props.row.authCode+".flv";
+      let videoUrl = API.flvURL+"/live/"+playParam.playMethod+"/"+playParam.cameraCode+"/"+playParam.authCode+".flv";
       mediaDataSource['url'] = videoUrl;
       mediaDataSource['hasAudio'] = audio;
       mediaDataSource['isLive'] = true;

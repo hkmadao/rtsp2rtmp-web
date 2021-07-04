@@ -1,7 +1,7 @@
 import { HashRouter } from "react-router-dom";
 import Routing from './route/Routing';
 
-function Rtmp2flv() {
+function Rtsp2rtmp() {
   return (
     <div>
         <HashRouter>
@@ -11,4 +11,4 @@ function Rtmp2flv() {
   );
 } 
 
-export default Rtmp2flv;
+export default Rtsp2rtmp;

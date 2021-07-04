@@ -9,8 +9,9 @@ import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
 import TextField from '@material-ui/core/TextField';
 import { Alert, AlertTitle } from '@material-ui/lab';
+import Moment from 'moment'
 import Switch from '@material-ui/core/Switch';
-import API from '../api/Api'; 
+import API from '../api/Api';
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -35,22 +36,19 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function CameraEdit(props) {
+export default function CameraShareEdit(props) {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
   const [enabled, setEnabled] = React.useState(props.row.enabled === 1?true:false);
-  const [saveVideo, setSaveVideo] = React.useState(props.row.saveVideo === 1?true:false);
-  const [live, setLive] = React.useState(props.row.live === 1?true:false);
+  const cameraCode = props.row.cameraCode
   const [row, setRow] = React.useState({
     id: props.row.id,
-    code: props.row.code,
-    rtspURL: props.row.rtspURL,
-    rtmpURL: props.row.rtmpURL,
-    playAuthCode: props.row.playAuthCode,
-    onlineStatus: props.row.onlineStatus,
+    cameraId: props.row.cameraId,
+    name: props.row.name,
+    authCode: props.row.authCode,
+    startTime: props.row.startTime?props.row.startTime:Moment(),
+    deadline: props.row.deadline?props.row.deadline:Moment().add(7,"day"),
     enabled: props.row.enabled,
-    saveVideo: props.row.saveVideo,
-    live: props.row.live,
   });
   const [alertShow, setAlertShow] = React.useState(false);
   const [alertText, setAlertText] = React.useState("");
@@ -63,6 +61,14 @@ export default function CameraEdit(props) {
   });
 
   const handleClickOpen = () => {
+    row.id = props.row.id
+    row.cameraId = props.row.cameraId
+    row.name = props.row.name
+    row.authCode = props.row.authCode
+    row.startTime = props.row.startTime?props.row.startTime:Moment()
+    row.deadline = props.row.deadline?props.row.deadline:Moment().add(7,"day")
+    row.enabled = props.row.enabled
+    setRow(row)
     setOpen(true);
   };
 
@@ -71,7 +77,7 @@ export default function CameraEdit(props) {
   };
 
   const save = (data) => {
-    API.cameraEdit(row)
+    API.cameraShareEdit(row)
     .then(res => {
       if (res.code === 1) {
         setOpen(false);
@@ -89,7 +95,7 @@ export default function CameraEdit(props) {
   };
 
   const deleteCamera = (data) => {
-    API.cameraDelete(row)
+    API.cameraShareDelete(row)
     .then(res => {
       if (res.code === 1) {
         setOpen(false);
@@ -110,17 +116,15 @@ export default function CameraEdit(props) {
     row[event.target.id] = event.target.value
   }
 
+  const formDateTimeChange = (event) => {
+    row[event.target.id] = Moment(event.target.value)
+  }
+
   const switchChange = (event) => {
     console.log(event.target.checked)
     row[event.target.id] = event.target.checked?1:0
     if(event.target.id==="enabled"){
       setEnabled(event.target.checked)
-    }
-    if(event.target.id==="saveVideo"){
-      setSaveVideo(event.target.checked)
-    }
-    if(event.target.id==="live"){
-      setLive(event.target.checked)
     }
   }
 
@@ -130,7 +134,7 @@ export default function CameraEdit(props) {
         <AppBar className={classes.appBar}>
           <Toolbar>
             <Button variant="contained" onClick={save}>
-              保存
+              保存 
             </Button>
             <span>&nbsp;&nbsp;</span>
             {props.type === 'edit'?
@@ -139,7 +143,7 @@ export default function CameraEdit(props) {
               </Button>:""
             }       
             <Typography variant="h6" className={classes.title}>
-              
+            <div>{row.name?row.name+' 分享编辑':'创建分享'} </div>
             </Typography>
             <Button autoFocus color="inherit" onClick={handleClose}>
               <CloseIcon />
@@ -154,6 +158,7 @@ export default function CameraEdit(props) {
         }
         
         <div className={classes.formDiv}>
+          
           <form className={classes.formClass} noValidate autoComplete="off" onSubmit={save}>
             {props.type === 'edit'?
             <div>
@@ -168,31 +173,48 @@ export default function CameraEdit(props) {
             </div>:""}
             <div>
               <TextField 
-                id="code" 
-                label="摄像头编号" 
-                defaultValue={row.code}
+                id="name" 
+                label="分享名称" 
+                defaultValue={row.name}
                 onChange={formChange}
               />
             </div>
-            <div>
+            {/* <div>
               <TextField 
-                id="rtspURL" 
-                label="rtspURL" 
-                defaultValue={row.rtspURL}
+                id="authCode" 
+                label="authCode" 
+                defaultValue={row.authCode}
                 onChange={formChange}
+              />
+            </div> */}
+            <div>
+              <TextField
+                id="startTime"
+                label="开始时间"
+                type="datetime-local"
+                defaultValue={row.startTime?Moment(row.startTime).format("YYYY-MM-DDTHH:mm"):Moment().format("YYYY-MM-DDTHH:mm")}
+                // className={classes.textField}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                onChange={formDateTimeChange}
               />
             </div>
             <div>
-              <TextField 
-                id="rtmpURL" 
-                label="rtmpURL" 
-                defaultValue={row.rtmpURL}
-                onChange={formChange}
+              <TextField
+                id="deadline"
+                label="截止日期"
+                type="datetime-local"
+                defaultValue={row.deadline?Moment(row.deadline).format("YYYY-MM-DDTHH:mm"):Moment().add(7,"day").format("YYYY-MM-DDTHH:mm")}
+                // className={classes.textField}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                onChange={formDateTimeChange}
               />
             </div>
             {props.type === 'edit'?"":
             <div>
-              启用状态：
               <Switch
                 checked={enabled}
                 id="enabled"
@@ -203,28 +225,6 @@ export default function CameraEdit(props) {
               />
             </div>
             }
-            <div>
-              录像状态：
-              <Switch
-                checked={saveVideo}
-                id="saveVideo"
-                onChange={switchChange}
-                color="primary"
-                name="saveVideo"
-                inputProps={{ 'aria-label': 'primary checkbox' }}
-              />
-            </div>
-            <div>
-              直播状态：
-              <Switch
-                checked={live}
-                id="live"
-                onChange={switchChange}
-                color="primary"
-                name="live"
-                inputProps={{ 'aria-label': 'primary checkbox' }}
-              />
-            </div>
           </form>
         </div>
       </Dialog>

@@ -5,9 +5,10 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListIcon from '@material-ui/icons/List';
-import {NavLink} from 'react-router-dom'
-import Play from './Play';
-import CameraEdit from './CameraEdit';
+import Copy from 'copy-to-clipboard';
+import CopyAlert from './CopyAlert'
+import Play from '../camera/Play';
+import CameraEdit from './CameraShareEdit';
 import API from '../api/Api';
 
 const useStyles = makeStyles(() => ({
@@ -29,6 +30,7 @@ const useStyles = makeStyles(() => ({
 export default function ActionList(props) {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
+  const [dialogObj, setDialogObj] = React.useState({title:"Success",content:"copy success !"});
   const [row,setRow] = React.useState(props.row);
 
   const handleClick = () => {
@@ -41,48 +43,7 @@ export default function ActionList(props) {
 
   const enabled=() => {
     row.enabled = row.enabled === 1?0:1
-    API.cameraEnabled(row)
-    .then(res => {
-      if (res.code === 1) {
-        setOpen(false);
-        if (props.callBack){
-          props.callBack()
-        }
-        return;
-      }
-    });
-  }
-
-  const saveVideoChange=() => {
-    row.saveVideo = row.saveVideo === 1?0:1
-    API.cameraSaveVideoChange(row)
-    .then(res => {
-      if (res.code === 1) {
-        setOpen(false);
-        if (props.callBack){
-          props.callBack()
-        }
-        return;
-      }
-    });
-  }
-
-  const liveChange=() => {
-    row.live = row.live === 1?0:1
-    API.cameraLiveChange(row)
-    .then(res => {
-      if (res.code === 1) {
-        setOpen(false);
-        if (props.callBack){
-          props.callBack()
-        }
-        return;
-      }
-    });
-  }
-
-  const playAuthcodeReset=() => {
-    API.cameraPlayAuthcodeReset(row)
+    API.cameraShareEnabled(row)
     .then(res => {
       if (res.code === 1) {
         setOpen(false);
@@ -97,6 +58,7 @@ export default function ActionList(props) {
   let playRef = React.createRef();
   function play() {
     setOpen(false);
+    setRow(props.row)
     playRef.current.handleClickOpen();
   }
 
@@ -104,6 +66,14 @@ export default function ActionList(props) {
   function edit() {
     setOpen(false);
     editRef.current.handleClickOpen();
+  }
+
+  let copyRef = React.createRef();
+  function share() {
+    setOpen(false);
+    let sURL = window.location.origin+window.location.pathname+"#/live?method=temp&code="+props.row.cameraCode+"&authCode="+props.row.authCode
+    Copy(sURL);
+    copyRef.current.handleClickOpen();
   }
 
   return (
@@ -127,34 +97,15 @@ export default function ActionList(props) {
               <ListItem button onClick={play}>
                 <ListItemText primary="播放" />
               </ListItem>
-              <ListItem button>
-                <NavLink exact to={{
-                  pathname: "/camerashare",
-                  search: "?cameraId=" + props.row.id,
-                  // hash: "#camerashare",
-                  state: { row: props.row }
-                }}>分享</NavLink>
-              </ListItem>
-              <ListItem button>
-                <ListItemText primary="重置播放权限码" onClick={playAuthcodeReset}/>
-              </ListItem>
-              <ListItem button onClick={saveVideoChange}>
-                {
-                  props.row.saveVideo === 1?
-                  <ListItemText primary="停止录像" />:<ListItemText primary="开启录像" />
-                }
-              </ListItem>
-              <ListItem button onClick={liveChange}>
-                {
-                  props.row.live === 1?
-                  <ListItemText primary="停止直播" />:<ListItemText primary="开启直播" />
-                }
+              <ListItem button onClick={share}>
+                <ListItemText primary="分享" />
               </ListItem>
             </List>
           </div>
         ) : null}
-        <Play playParam={ {playMethod:"permanent",cameraCode:props.row.code,authCode:props.row.playAuthCode } } onRef={playRef}/>
+        <Play playParam={ {playMethod:"temp",cameraCode:row.cameraCode,authCode:row.authCode } } onRef={playRef}/>
         <CameraEdit row={props.row} type="edit" callBack={props.callBack} onRef={editRef}/>
+        <CopyAlert dialog={dialogObj} onRef={copyRef}/>
       </div>
     </ClickAwayListener>
   );

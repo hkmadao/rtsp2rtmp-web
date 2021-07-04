@@ -12,6 +12,8 @@ import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import { Alert, AlertTitle } from '@material-ui/lab';
+import API from '../api/Api';
 
 function Copyright() {
   return (
@@ -59,6 +61,36 @@ const useStyles = makeStyles((theme) => ({
 
 export default function SignInSide() {
   const classes = useStyles();
+  const [user, setUser] = React.useState({userName:"",password:""});
+  const [alertShow, setAlertShow] = React.useState(false);
+  const [alertText, setAlertText] = React.useState("");
+
+  const onLoad = () =>{
+    if ( window.localStorage.getItem("tokenExpired") === "true"){
+      localStorage.setItem("tokenExpired", "false");
+    }
+  }
+
+  const login = (event) => {
+    API.login(user)
+    .then(res => {
+      if (res.code === 1) {
+        let localStorage = window.localStorage
+        localStorage.setItem("token",res.data.token)
+        localStorage.setItem("tokenExpired", "false");
+        window.location.hash = "#/" 
+        return;
+      }
+      setAlertText(res.msg);
+      setAlertShow(true);
+    });
+  }
+
+  const formChange = (event) => {
+    user[event.target.id] = event.target.value
+  }
+
+  React.useEffect(onLoad,[]) 
 
   return (
     <Grid container component="main" className={classes.root}>
@@ -72,17 +104,25 @@ export default function SignInSide() {
           <Typography component="h1" variant="h5">
             Sign in
           </Typography>
+          {
+          alertShow?
+          <Alert severity="error">
+            <AlertTitle>Error</AlertTitle>
+            {alertText} <strong>check it out!</strong>
+          </Alert>:""
+        }
           <form className={classes.form} noValidate>
             <TextField
               variant="outlined"
               margin="normal"
               required
               fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
+              id="userName"
+              label="UserName"
+              name="userName"
+              autoComplete="userName"
               autoFocus
+              onChange={formChange}
             />
             <TextField
               variant="outlined"
@@ -94,17 +134,18 @@ export default function SignInSide() {
               type="password"
               id="password"
               autoComplete="current-password"
+              onChange={formChange}
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
               label="Remember me"
             />
             <Button
-              type="submit"
               fullWidth
               variant="contained"
               color="primary"
               className={classes.submit}
+              onClick={login}
             >
               Sign In
             </Button>
