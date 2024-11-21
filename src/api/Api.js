@@ -28,6 +28,9 @@
     cameraLiveChange: (params) => {
         return API.POST(`/camera/livechange`,params)
     },
+    camerartmpPushStatusChange: (params) => {
+        return API.POST(`/camera/rtmppushchange`,params)
+    },
     cameraPlayAuthcodeReset: (params) => {
         return API.POST(`/camera/playauthcodereset`,params)
     },
